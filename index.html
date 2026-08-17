@@ -39,6 +39,7 @@
     --bg-rgb:253,251,247;
     --ink-rgb:26,26,26;
     --accent-rgb:138,110,75;
+    --shadow-rgb:0,0,0;
   }
 
   html[data-theme="dark"]{
@@ -50,6 +51,7 @@
     --bg-rgb:0,0,0;
     --ink-rgb:243,239,230;
     --accent-rgb:159,184,209;
+    --shadow-rgb:0,0,0;
   }
 
   *{ margin:0; padding:0; box-sizing:border-box; }
@@ -107,7 +109,7 @@
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
     border-radius:9999px;
-    box-shadow:0 8px 24px rgba(var(--ink-rgb),0.08);
+    box-shadow:0 8px 24px rgba(var(--shadow-rgb),0.08);
     overflow:hidden;
     position:relative;
     cursor:default;
@@ -543,7 +545,7 @@
     height:1.25rem;
     border-radius:50%;
     background:var(--bg);
-    box-shadow:0 2px 6px rgba(var(--ink-rgb),0.25);
+    box-shadow:0 2px 6px rgba(var(--shadow-rgb),0.25);
     transition:transform 0.3s cubic-bezier(.34,1.4,.4,1), background 0.3s ease;
   }
   .theme-switch.on{
@@ -607,7 +609,7 @@
     background:rgba(var(--bg-rgb),0.9);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
-    box-shadow:0 12px 32px rgba(var(--ink-rgb),0.1);
+    box-shadow:0 12px 32px rgba(var(--shadow-rgb),0.1);
     opacity:0;
     transform:translateY(24px);
   }
@@ -688,9 +690,11 @@
     display:none;
     align-items:center;
     justify-content:center;
-    background:rgba(var(--ink-rgb),0.35);
-    backdrop-filter:blur(3px);
-    -webkit-backdrop-filter:blur(3px);
+    background:
+      radial-gradient(circle at 50% 32%, rgba(var(--accent-rgb),0.14), transparent 55%),
+      rgba(0,0,0,0.8);
+    backdrop-filter:blur(12px) saturate(115%);
+    -webkit-backdrop-filter:blur(12px) saturate(115%);
     opacity:0;
     padding:6vw;
   }
@@ -708,7 +712,7 @@
     background:var(--bg);
     border:1px solid var(--line);
     border-radius:0.7rem;
-    box-shadow:0 24px 60px rgba(var(--ink-rgb),0.18);
+    box-shadow:0 24px 60px rgba(var(--shadow-rgb),0.45);
     padding:2rem 1.8rem 1.8rem;
     text-align:left;
     transform:translateY(16px) scale(0.98);
@@ -762,6 +766,37 @@
   }
   .modal-field input:focus{
     border-color:var(--accent);
+  }
+
+  .modal-alan-secim{
+    display:flex;
+    gap:0.6rem;
+  }
+  .modal-alan-btn{
+    flex:1;
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:0.85rem;
+    letter-spacing:0.03em;
+    padding:0.6rem 0.8rem;
+    border-radius:0.5rem;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.15s ease;
+  }
+  .modal-alan-btn:hover{
+    border-color:var(--ink-soft);
+    color:var(--ink);
+  }
+  .modal-alan-btn:active{
+    transform:scale(0.97);
+  }
+  .modal-alan-btn.secili{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:var(--bg);
+    font-weight:600;
   }
 
   .modal-actions{
@@ -858,27 +893,43 @@
   .modal-tarih-btn.acik svg{ transform:rotate(180deg); color:var(--accent); }
 
   .mini-takvim{
-    position:absolute;
-    top:calc(100% + 0.6rem);
-    left:0;
-    right:0;
-    z-index:20;
-    background:var(--bg);
-    border:1px solid var(--line);
-    border-radius:0.6rem;
-    box-shadow:0 16px 40px rgba(var(--ink-rgb),0.16);
-    padding:0.9rem 0.85rem;
+    position:fixed;
+    inset:0;
+    z-index:200;
     display:none;
+    align-items:center;
+    justify-content:center;
+    padding:6vw;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
     opacity:0;
-    transform:translateY(-6px) scale(0.98);
-    transform-origin:top center;
   }
   .mini-takvim.acik{
-    display:block;
-    animation: miniTakvimIn 0.22s cubic-bezier(.22,1,.36,1) forwards;
+    display:flex;
+    animation: miniTakvimOverlayIn 0.22s ease forwards;
   }
-  @keyframes miniTakvimIn{
-    to{ opacity:1; transform:translateY(0) scale(1); }
+  @keyframes miniTakvimOverlayIn{
+    to{ opacity:1; }
+  }
+
+  .mini-takvim-card{
+    width:100%;
+    max-width:320px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:0.8rem;
+    box-shadow:0 26px 60px rgba(var(--shadow-rgb),0.5);
+    padding:1.1rem 1rem;
+    transform:translateY(18px) scale(0.92);
+    opacity:0;
+  }
+  .mini-takvim.acik .mini-takvim-card{
+    animation: miniTakvimCardIn 0.36s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:0.05s;
+  }
+  @keyframes miniTakvimCardIn{
+    to{ transform:translateY(0) scale(1); opacity:1; }
   }
 
   .mini-takvim-nav{
@@ -1036,7 +1087,7 @@
   .deneme-card:hover{
     border-color:var(--accent);
     transform:translateY(-3px);
-    box-shadow:0 14px 30px rgba(var(--ink-rgb),0.08);
+    box-shadow:0 14px 30px rgba(var(--shadow-rgb),0.08);
   }
 
   .deneme-card-eyebrow{
@@ -1326,10 +1377,22 @@
     font-style:italic;
     color:var(--ink-soft);
     text-align:center;
-    display:none;
   }
-  .takvim-secili-bilgi.active{
-    display:block;
+  .takvim-secili-bilgi.degisti{
+    animation: takvimBilgiIn 0.4s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes takvimBilgiIn{
+    from{ opacity:0; transform:translateY(5px); filter:blur(2px); }
+    to{ opacity:1; transform:translateY(0); filter:blur(0); }
+  }
+
+  .takvim-ay-yil.degisti,
+  .takvim-gunler.degisti{
+    animation: takvimAyIn 0.32s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes takvimAyIn{
+    from{ opacity:0; transform:translateX(var(--ay-yon, 10px)); }
+    to{ opacity:1; transform:translateX(0); }
   }
 
   .stage, .view-empty, .view-gundelik, .view-denemeler, .view-takvim, .view-deneme-detay{
@@ -1422,19 +1485,19 @@
     </div>
     <div class="deneme-grid" id="denemeGrid">
       <button class="deneme-card" type="button" data-index="0">
-        <span class="deneme-card-eyebrow">Deneme</span>
+        <span class="deneme-card-eyebrow">TYT</span>
         <div class="deneme-card-title">Sessizliğin Sesi Üzerine</div>
         <p class="deneme-card-sub">Kelimeler bazen susmak için vardır; bu ilk denemem tam da bunu arıyor.</p>
         <div class="deneme-card-meta">Taslak · 12 dakika</div>
       </button>
       <button class="deneme-card" type="button" data-index="1">
-        <span class="deneme-card-eyebrow">Deneme</span>
+        <span class="deneme-card-eyebrow">AYT</span>
         <div class="deneme-card-title">Kağıdın Hafızası</div>
         <p class="deneme-card-sub">Bir defterin üzerindeki ilk çizgi, aslında bir başlangıcın kendisidir.</p>
         <div class="deneme-card-meta">Taslak · 7 dakika</div>
       </button>
       <button class="deneme-card" type="button" data-index="2">
-        <span class="deneme-card-eyebrow">Deneme</span>
+        <span class="deneme-card-eyebrow">TYT</span>
         <div class="deneme-card-title">Boşluğa Dair</div>
         <p class="deneme-card-sub">Her cümlenin bittiği yerde, aslında yeni bir sessizlik başlar.</p>
         <div class="deneme-card-meta">Taslak · 4 dakika</div>
@@ -1526,6 +1589,14 @@
           <label for="denemeIsim">Deneme İsmi</label>
           <input type="text" id="denemeIsim" name="denemeIsim" placeholder="Örn. Sessizliğin Sesi Üzerine" required>
         </div>
+        <div class="modal-field">
+          <label id="denemeAlanLabel">Alan</label>
+          <div class="modal-alan-secim" id="denemeAlanSecim" role="radiogroup" aria-labelledby="denemeAlanLabel">
+            <button type="button" class="modal-alan-btn secili" data-alan="TYT" role="radio" aria-checked="true">TYT</button>
+            <button type="button" class="modal-alan-btn" data-alan="AYT" role="radio" aria-checked="false">AYT</button>
+          </div>
+          <input type="hidden" id="denemeAlan" name="denemeAlan" value="TYT">
+        </div>
         <div class="modal-field modal-field-tarih">
           <label for="denemeTarihBtn">Tarih</label>
           <button type="button" class="modal-tarih-btn bos" id="denemeTarihBtn" aria-haspopup="true" aria-expanded="false">
@@ -1533,27 +1604,33 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <input type="hidden" id="denemeTarih" name="denemeTarih">
-          <div class="mini-takvim" id="miniTakvim">
-            <div class="mini-takvim-nav">
-              <button class="mini-takvim-arrow" id="miniTakvimPrev" type="button" aria-label="Önceki ay">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              </button>
-              <span class="mini-takvim-ay-yil" id="miniTakvimAyYil"></span>
-              <button class="mini-takvim-arrow" id="miniTakvimNext" type="button" aria-label="Sonraki ay">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-            </div>
-            <div class="mini-takvim-haftagunleri">
-              <span>Pz</span><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span>
-            </div>
-            <div class="mini-takvim-gunler" id="miniTakvimGunler"></div>
-          </div>
         </div>
         <div class="modal-actions">
           <button type="button" class="modal-btn" id="denemeModalCancel">Vazgeç</button>
           <button type="submit" class="modal-btn modal-btn-primary" id="denemeModalSubmit">Ekle</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Tarih seçici: modal-box'ın DIŞINDA duruyor, çünkü modal-box transform animasyonu -->
+  <!-- kullandığı için içindeki position:fixed elemanlar ekrana değil modal-box'a göre -->
+  <!-- konumlanırdı. Burada gerçek tam ekran ortalamalı overlay olarak çalışır. -->
+  <div class="mini-takvim" id="miniTakvim">
+    <div class="mini-takvim-card">
+      <div class="mini-takvim-nav">
+        <button class="mini-takvim-arrow" id="miniTakvimPrev" type="button" aria-label="Önceki ay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <span class="mini-takvim-ay-yil" id="miniTakvimAyYil"></span>
+        <button class="mini-takvim-arrow" id="miniTakvimNext" type="button" aria-label="Sonraki ay">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+      <div class="mini-takvim-haftagunleri">
+        <span>Pz</span><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span>
+      </div>
+      <div class="mini-takvim-gunler" id="miniTakvimGunler"></div>
     </div>
   </div>
 
@@ -1628,6 +1705,12 @@
       highlight.style.left = link.offsetLeft + 'px';
       highlight.style.width = link.offsetWidth + 'px';
       highlight.classList.add('ready');
+      // Tarayıcının odaklanma sırasında kendi kendine (bazen yanlış hesaplayarak
+      // komşu öğenin ilk harfini kırpan) otomatik kaydırmasının önüne geçip,
+      // kaydırmayı burada kendimiz, tam ve güvenli şekilde yapıyoruz.
+      if(link.scrollIntoView){
+        link.scrollIntoView({ behavior:'smooth', inline:'nearest', block:'nearest' });
+      }
     }
 
     // ---- Görünüm değiştirme (Ana Sayfa / Yakında) ----
@@ -1800,6 +1883,30 @@
       const grid = document.getElementById('denemeGrid');
       const newBtn = document.getElementById('denemeNewBtn');
 
+      // ---- Alan seçimi (TYT / AYT) ----
+      const alanInput = document.getElementById('denemeAlan');
+      const alanBtns = Array.from(document.querySelectorAll('#denemeAlanSecim .modal-alan-btn'));
+      alanBtns.forEach(function(btn){
+        btn.addEventListener('click', function(){
+          alanBtns.forEach(function(b){
+            b.classList.remove('secili');
+            b.setAttribute('aria-checked', 'false');
+          });
+          btn.classList.add('secili');
+          btn.setAttribute('aria-checked', 'true');
+          alanInput.value = btn.dataset.alan;
+        });
+      });
+      function alanSifirla(){
+        alanBtns.forEach(function(b){
+          b.classList.remove('secili');
+          b.setAttribute('aria-checked', 'false');
+        });
+        alanBtns[0].classList.add('secili');
+        alanBtns[0].setAttribute('aria-checked', 'true');
+        alanInput.value = alanBtns[0].dataset.alan;
+      }
+
       // ---- Tarih için mini takvim ----
       const tarihBtn = document.getElementById('denemeTarihBtn');
       const tarihText = document.getElementById('denemeTarihText');
@@ -1899,8 +2006,8 @@
         miniGoruntulenen = new Date(miniGoruntulenen.getFullYear(), miniGoruntulenen.getMonth() + 1, 1);
         miniCiz();
       });
-      document.addEventListener('click', function(e){
-        if(!miniTakvim.contains(e.target) && e.target !== tarihBtn){ kapatMiniTakvim(); }
+      miniTakvim.addEventListener('click', function(e){
+        if(e.target === miniTakvim){ kapatMiniTakvim(); }
       });
 
       function openModal(){
@@ -1911,6 +2018,7 @@
         overlay.classList.remove('active');
         form.reset();
         miniTakvimSifirla();
+        alanSifirla();
       }
 
       miniCiz();
@@ -1922,7 +2030,9 @@
         if(e.target === overlay){ closeModal(); }
       });
       document.addEventListener('keydown', function(e){
-        if(e.key === 'Escape' && overlay.classList.contains('active')){ closeModal(); }
+        if(e.key !== 'Escape') return;
+        if(miniTakvim.classList.contains('acik')){ kapatMiniTakvim(); }
+        else if(overlay.classList.contains('active')){ closeModal(); }
       });
 
       function formatTarih(value){
@@ -1939,13 +2049,14 @@
         e.preventDefault();
         const isim = isimInput.value.trim();
         const tarih = tarihInput.value;
+        const alan = alanInput.value || 'TYT';
         if(!isim || !tarih) return;
 
         const card = document.createElement('button');
         card.className = 'deneme-card';
         card.type = 'button';
         card.innerHTML =
-          '<span class="deneme-card-eyebrow">Deneme</span>' +
+          '<span class="deneme-card-eyebrow">' + alan + '</span>' +
           '<div class="deneme-card-title">' + isim.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
           '<p class="deneme-card-sub">Yeni eklenen deneme. İçeriğini eklemeye hazır.</p>' +
           '<div class="deneme-card-meta">' + formatTarih(tarih) + '</div>';
@@ -1977,7 +2088,7 @@
       const gunIsimleriUzun = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 
       let goruntulenenTarih = new Date();
-      let seciliTarih = null;
+      let seciliTarih = new Date();
 
       function ayGunleriniOlustur(tarih){
         const yil = tarih.getFullYear();
@@ -2002,6 +2113,13 @@
         return gunler;
       }
 
+      function bilgiGuncelle(tarih){
+        takvimSeciliBilgi.classList.remove('degisti');
+        void takvimSeciliBilgi.offsetWidth;
+        takvimSeciliBilgi.textContent = gunIsimleriUzun[tarih.getDay()] + ', ' + tarih.getDate() + ' ' + ayIsimleri[tarih.getMonth()] + ' ' + tarih.getFullYear();
+        takvimSeciliBilgi.classList.add('degisti');
+      }
+
       function ciz(){
         takvimAyYil.textContent = ayIsimleri[goruntulenenTarih.getMonth()] + ' ' + goruntulenenTarih.getFullYear();
         takvimGunler.innerHTML = '';
@@ -2017,23 +2135,33 @@
           btn.addEventListener('click', function(){
             seciliTarih = gun.tarih;
             ciz();
-            takvimSeciliBilgi.textContent = gunIsimleriUzun[gun.tarih.getDay()] + ', ' + gun.tarih.getDate() + ' ' + ayIsimleri[gun.tarih.getMonth()] + ' ' + gun.tarih.getFullYear();
-            takvimSeciliBilgi.classList.add('active');
+            bilgiGuncelle(gun.tarih);
           });
           takvimGunler.appendChild(btn);
         });
       }
 
-      takvimPrev.addEventListener('click', function(){
-        goruntulenenTarih = new Date(goruntulenenTarih.getFullYear(), goruntulenenTarih.getMonth() - 1, 1);
+      function ayDegistir(yon){
+        goruntulenenTarih = new Date(goruntulenenTarih.getFullYear(), goruntulenenTarih.getMonth() + yon, 1);
+        takvimAyYil.style.setProperty('--ay-yon', (yon > 0 ? 12 : -12) + 'px');
+        takvimGunler.style.setProperty('--ay-yon', (yon > 0 ? 12 : -12) + 'px');
+        takvimAyYil.classList.remove('degisti');
+        takvimGunler.classList.remove('degisti');
+        void takvimGunler.offsetWidth;
         ciz();
+        takvimAyYil.classList.add('degisti');
+        takvimGunler.classList.add('degisti');
+      }
+
+      takvimPrev.addEventListener('click', function(){
+        ayDegistir(-1);
       });
       takvimNext.addEventListener('click', function(){
-        goruntulenenTarih = new Date(goruntulenenTarih.getFullYear(), goruntulenenTarih.getMonth() + 1, 1);
-        ciz();
+        ayDegistir(1);
       });
 
       ciz();
+      bilgiGuncelle(seciliTarih);
 
       window.showTakvimView = function(){
         hideAllViews();
@@ -2051,6 +2179,7 @@
         takvimEyebrow.classList.add('animate');
         takvimTitle.classList.add('animate');
         takvimCard.classList.add('animate');
+        bilgiGuncelle(seciliTarih);
       };
     })();
 
