@@ -16,6 +16,19 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
 
+<script>
+  // Koyu mod tercihini stiller çizilmeden önce uygula (yanıp sönmeyi engeller)
+  (function(){
+    try{
+      var kayitli = localStorage.getItem('sessizlik-tema');
+      var sistemKoyu = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if(kayitli === 'dark' || (kayitli !== 'light' && sistemKoyu)){
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    }catch(e){}
+  })();
+</script>
+
 <style>
   :root{
     --bg:#FDFBF7;
@@ -23,17 +36,32 @@
     --ink-soft:#6B675F;
     --line:#D8D2C4;
     --accent:#8A6E4B;
+    --bg-rgb:253,251,247;
+    --ink-rgb:26,26,26;
+    --accent-rgb:138,110,75;
+  }
+
+  html[data-theme="dark"]{
+    --bg:#000000;
+    --ink:#F3EFE6;
+    --ink-soft:#A8A199;
+    --line:#2A2A2A;
+    --accent:#9FB8D1;
+    --bg-rgb:0,0,0;
+    --ink-rgb:243,239,230;
+    --accent-rgb:159,184,209;
   }
 
   *{ margin:0; padding:0; box-sizing:border-box; }
 
   html,body{
-    background:#FDFBF7;
-    color:#1A1A1A;
+    background:var(--bg);
+    color:var(--ink);
     font-family: "Iowan Old Style","Palatino Linotype","Georgia","Times New Roman",serif;
     overflow-x:hidden;
     min-height:100vh;
     touch-action:pan-x pan-y;
+    transition:background 0.35s ease, color 0.35s ease;
   }
 
   /* ---- zoom / seçim / kopyalama engelleme ---- */
@@ -75,16 +103,17 @@
     align-items:center;
     height:3rem;
     border:1px solid var(--line);
-    background:rgba(253,251,247,0.82);
+    background:rgba(var(--bg-rgb),0.82);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
     border-radius:9999px;
-    box-shadow:0 8px 24px rgba(26,26,26,0.08);
+    box-shadow:0 8px 24px rgba(var(--ink-rgb),0.08);
     overflow:hidden;
     position:relative;
     cursor:default;
     width:auto;
-    transition: width 0.5s cubic-bezier(.34,1.4,.4,1);
+    max-width:92vw;
+    transition: width 0.45s cubic-bezier(.4,0,.2,1), transform 0.2s ease;
   }
   .nav-pill.collapsed{
     width:3rem;
@@ -95,9 +124,6 @@
   }
   .nav-pill.collapsed:active{
     transform:scale(0.95);
-  }
-  .nav-pill{
-    transition: width 0.5s cubic-bezier(.34,1.4,.4,1), transform 0.2s ease;
   }
 
   .nav-logo{
@@ -111,6 +137,7 @@
     margin-right:0.35rem;
     color:var(--ink);
     opacity:1;
+    cursor:pointer;
     transform:rotate(0deg) translateX(0);
     transition: opacity 0.3s ease, transform 0.35s ease;
   }
@@ -127,9 +154,24 @@
     gap:0.35rem;
     padding-right:1.1rem;
     position:relative;
+    min-width:0;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
   }
+  .nav-items::-webkit-scrollbar{ display:none; }
   .nav-pill.collapsed .nav-items{
     pointer-events:none;
+  }
+
+  @media (max-width:430px){
+    .nav-logo{ margin-left:0.65rem; margin-right:0.2rem; }
+    .nav-items{ gap:0.1rem; padding-right:0.8rem; }
+    .nav-items a{ font-size:0.72rem; padding:0.4rem 0.42rem; }
+  }
+  @media (max-width:360px){
+    .nav-items a{ font-size:0.66rem; padding:0.38rem 0.32rem; letter-spacing:0.01em; }
   }
 
   .nav-highlight{
@@ -139,7 +181,7 @@
     left:0;
     width:0;
     border-radius:9999px;
-    background:rgba(138,110,75,0.16);
+    background:rgba(var(--accent-rgb),0.16);
     z-index:0;
     transition: left 0.4s cubic-bezier(.65,0,.35,1), width 0.4s cubic-bezier(.65,0,.35,1), opacity 0.25s ease;
     opacity:0;
@@ -168,7 +210,7 @@
   .nav-pill.collapsed .nav-items a{
     opacity:0;
     transform:translateX(-20px) scale(0.95);
-    transition-delay: calc((3 - var(--i, 0)) * 0.04s);
+    transition-delay: calc((4 - var(--i, 0)) * 0.04s);
   }
 
   .nav-menu-icon{
@@ -189,7 +231,7 @@
   }
   .nav-menu-icon svg{ width:1.25rem; height:1.25rem; }
 
-  /* ---- ambient ink drift, behind everything ---- */
+  /* ---- ambient light rays, behind everything ---- */
   .field{
     position:fixed;
     inset:0;
@@ -197,25 +239,79 @@
     pointer-events:none;
     overflow:hidden;
   }
-  .mote{
-    position:absolute;
-    border-radius:50%;
-    background: radial-gradient(circle at 30% 30%, rgba(138,110,75,0.35), rgba(138,110,75,0) 70%);
-    opacity:0;
-    animation: drift 18s ease-in-out infinite;
-  }
-  .mote:nth-child(1){ width:220px; height:220px; left:8%;  top:15%; animation-delay:0s;   }
-  .mote:nth-child(2){ width:140px; height:140px; left:78%; top:22%; animation-delay:3.2s; }
-  .mote:nth-child(3){ width:180px; height:180px; left:60%; top:70%; animation-delay:6.4s; }
-  .mote:nth-child(4){ width:100px; height:100px; left:20%; top:78%; animation-delay:9.6s; }
-  .mote:nth-child(5){ width:260px; height:260px; left:40%; top:40%; animation-delay:12.8s;}
 
-  @keyframes drift{
-    0%   { opacity:0; transform: translate(0,0) scale(0.85); }
-    15%  { opacity:0.5; }
-    50%  { opacity:0.25; transform: translate(-18px,22px) scale(1.05); }
-    85%  { opacity:0.5; }
-    100% { opacity:0; transform: translate(12px,-16px) scale(0.9); }
+  /* süzülen ışık huzmeleri: geniş yumuşak yayılma + parlak ince çekirdek */
+  .ray{
+    position:absolute;
+    top:-35%;
+    height:170%;
+    background:linear-gradient(180deg,
+      rgba(var(--accent-rgb),0) 0%,
+      rgba(var(--accent-rgb),0.26) 34%,
+      rgba(var(--accent-rgb),0.10) 62%,
+      rgba(var(--accent-rgb),0) 100%);
+    filter:blur(20px);
+    opacity:0;
+    transform: rotate(var(--angle));
+    transform-origin: top center;
+    animation: rayGlow 11s ease-in-out infinite;
+    will-change: opacity, filter, transform;
+  }
+  .ray::before{
+    content:'';
+    position:absolute;
+    top:0; bottom:0;
+    left:40%;
+    right:40%;
+    background:linear-gradient(180deg,
+      rgba(var(--accent-rgb),0) 0%,
+      rgba(var(--accent-rgb),0.55) 40%,
+      rgba(var(--accent-rgb),0.18) 68%,
+      rgba(var(--accent-rgb),0) 100%);
+    filter:blur(2px);
+  }
+  .ray:nth-child(1){ left:-6%;  width:230px; --angle:16deg; animation-delay:0s;   }
+  .ray:nth-child(2){ left:32%;  width:160px; --angle:11deg; animation-delay:3.8s; }
+  .ray:nth-child(3){ left:68%;  width:200px; --angle:19deg; animation-delay:7.6s; }
+
+  @keyframes rayGlow{
+    0%   { opacity:0;    filter:blur(20px); transform: rotate(var(--angle)); }
+    22%  { opacity:0.78; filter:blur(13px); transform: rotate(calc(var(--angle) - 1.2deg)); }
+    50%  { opacity:0.38; filter:blur(22px); transform: rotate(calc(var(--angle) + 1deg)); }
+    78%  { opacity:0.78; filter:blur(13px); transform: rotate(calc(var(--angle) - 0.6deg)); }
+    100% { opacity:0;    filter:blur(20px); transform: rotate(var(--angle)); }
+  }
+
+  /* huzmelerin içinde süzülen, parıldayan toz zerreleri */
+  .dust{
+    position:absolute;
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:rgba(var(--accent-rgb),0.75);
+    box-shadow:0 0 8px 2px rgba(var(--accent-rgb),0.5);
+    opacity:0;
+    animation: dustFloat linear infinite;
+  }
+  .dust:nth-child(4){  left:12%; top:70%; width:2px;  height:2px;  animation-duration:15s; animation-delay:0s;   }
+  .dust:nth-child(5){  left:24%; top:82%; width:4px;  height:4px;  animation-duration:18s; animation-delay:2.4s; }
+  .dust:nth-child(6){  left:38%; top:60%; width:2.5px;height:2.5px;animation-duration:13s; animation-delay:4.8s; }
+  .dust:nth-child(7){  left:52%; top:88%; width:3px;  height:3px;  animation-duration:20s; animation-delay:1.2s; }
+  .dust:nth-child(8){  left:66%; top:65%; width:4px;  height:4px;  animation-duration:16s; animation-delay:6s;   }
+  .dust:nth-child(9){  left:78%; top:78%; width:2px;  height:2px;  animation-duration:14s; animation-delay:3.6s; }
+  .dust:nth-child(10){ left:88%; top:58%; width:3.5px;height:3.5px;animation-duration:19s; animation-delay:8.4s; }
+
+  @keyframes dustFloat{
+    0%   { opacity:0;    transform: translate(0,0) scale(0.8); }
+    10%  { opacity:0.9;  transform: translate(1px,-8px) scale(1); }
+    50%  { opacity:0.45; transform: translate(6px,-55px) scale(1.15); }
+    75%  { opacity:0.9;  transform: translate(2px,-90px) scale(1); }
+    100% { opacity:0;    transform: translate(-8px,-120px) scale(0.8); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ray{ animation:none; opacity:0.32; transform:rotate(var(--angle)); }
+    .dust{ animation:none; opacity:0.25; }
   }
 
   /* ---- content ---- */
@@ -391,6 +487,73 @@
     animation-delay:0.55s;
   }
 
+  .settings-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:2rem;
+    margin-top:2.2rem;
+    padding:1rem 1.3rem;
+    border:1px solid var(--line);
+    border-radius:1.1rem;
+    background:rgba(var(--accent-rgb),0.06);
+    opacity:0;
+    transform:translateY(16px);
+    transition:background 0.35s ease, border-color 0.35s ease;
+  }
+  .settings-row.animate{
+    animation: rise 0.8s cubic-bezier(.22,1,.36,1) forwards;
+    animation-delay:0.7s;
+  }
+  .settings-row-text{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:0.2rem;
+    text-align:left;
+  }
+  .settings-row-title{
+    font-size:1rem;
+    color:var(--ink);
+  }
+  .settings-row-sub{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:0.72rem;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+  }
+
+  .theme-switch{
+    flex-shrink:0;
+    position:relative;
+    width:3rem;
+    height:1.7rem;
+    border-radius:9999px;
+    border:1px solid var(--line);
+    background:rgba(var(--ink-rgb),0.12);
+    cursor:pointer;
+    padding:0;
+    transition:background 0.3s ease, border-color 0.3s ease;
+  }
+  .theme-switch-knob{
+    position:absolute;
+    top:0.15rem;
+    left:0.15rem;
+    width:1.25rem;
+    height:1.25rem;
+    border-radius:50%;
+    background:var(--bg);
+    box-shadow:0 2px 6px rgba(var(--ink-rgb),0.25);
+    transition:transform 0.3s cubic-bezier(.34,1.4,.4,1), background 0.3s ease;
+  }
+  .theme-switch.on{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .theme-switch.on .theme-switch-knob{
+    transform:translateX(1.3rem);
+  }
+
   /* ================= GÜNDELİK GÖRÜNÜMÜ - DOCK NAVBAR ================= */
   .view-gundelik{
     position:relative;
@@ -441,10 +604,10 @@
     padding:0.7rem;
     border-radius:1.6rem;
     border:1px solid var(--line);
-    background:rgba(253,251,247,0.9);
+    background:rgba(var(--bg-rgb),0.9);
     backdrop-filter:blur(10px);
     -webkit-backdrop-filter:blur(10px);
-    box-shadow:0 12px 32px rgba(26,26,26,0.1);
+    box-shadow:0 12px 32px rgba(var(--ink-rgb),0.1);
     opacity:0;
     transform:translateY(24px);
   }
@@ -475,7 +638,7 @@
     transition: background 0.2s ease, transform 0.2s ease;
   }
   .dock-btn:hover{
-    background:rgba(138,110,75,0.12);
+    background:rgba(var(--accent-rgb),0.12);
     transform:translateY(-3px) scale(1.08);
   }
   .dock-btn:active{
@@ -525,7 +688,7 @@
     display:none;
     align-items:center;
     justify-content:center;
-    background:rgba(26,26,26,0.35);
+    background:rgba(var(--ink-rgb),0.35);
     backdrop-filter:blur(3px);
     -webkit-backdrop-filter:blur(3px);
     opacity:0;
@@ -545,7 +708,7 @@
     background:var(--bg);
     border:1px solid var(--line);
     border-radius:0.7rem;
-    box-shadow:0 24px 60px rgba(26,26,26,0.18);
+    box-shadow:0 24px 60px rgba(var(--ink-rgb),0.18);
     padding:2rem 1.8rem 1.8rem;
     text-align:left;
     transform:translateY(16px) scale(0.98);
@@ -657,7 +820,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
   .modal-close:hover{
-    background:rgba(138,110,75,0.12);
+    background:rgba(var(--accent-rgb),0.12);
     color:var(--ink);
   }
   .modal-close svg{ width:1.1rem; height:1.1rem; }
@@ -703,7 +866,7 @@
     background:var(--bg);
     border:1px solid var(--line);
     border-radius:0.6rem;
-    box-shadow:0 16px 40px rgba(26,26,26,0.16);
+    box-shadow:0 16px 40px rgba(var(--ink-rgb),0.16);
     padding:0.9rem 0.85rem;
     display:none;
     opacity:0;
@@ -738,7 +901,7 @@
     transition: background 0.2s ease, transform 0.2s ease;
   }
   .mini-takvim-arrow:hover{
-    background:rgba(138,110,75,0.12);
+    background:rgba(var(--accent-rgb),0.12);
     transform:scale(1.08);
   }
   .mini-takvim-arrow svg{ width:0.95rem; height:0.95rem; }
@@ -785,7 +948,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
   .mini-takvim-gun:hover{
-    background:rgba(138,110,75,0.1);
+    background:rgba(var(--accent-rgb),0.1);
   }
   .mini-takvim-gun.disi-ay{
     color:var(--ink-soft);
@@ -858,7 +1021,7 @@
     padding:1.6rem 1.5rem;
     border:1px solid var(--line);
     border-radius:0.6rem;
-    background:rgba(253,251,247,0.6);
+    background:rgba(var(--bg-rgb),0.6);
     cursor:pointer;
     opacity:0;
     transform:translateY(18px);
@@ -873,7 +1036,7 @@
   .deneme-card:hover{
     border-color:var(--accent);
     transform:translateY(-3px);
-    box-shadow:0 14px 30px rgba(26,26,26,0.08);
+    box-shadow:0 14px 30px rgba(var(--ink-rgb),0.08);
   }
 
   .deneme-card-eyebrow{
@@ -922,7 +1085,7 @@
   .deneme-card-new:hover{
     color:var(--ink);
     border-color:var(--accent);
-    background:rgba(138,110,75,0.05);
+    background:rgba(var(--accent-rgb),0.05);
   }
   .deneme-card-new svg{ width:1.1rem; height:1.1rem; flex-shrink:0; }
 
@@ -1058,7 +1221,7 @@
     width:100%;
     border:1px solid var(--line);
     border-radius:0.9rem;
-    background:rgba(253,251,247,0.7);
+    background:rgba(var(--bg-rgb),0.7);
     padding:1.8rem 1.6rem;
     opacity:0;
     transform:translateY(18px);
@@ -1088,7 +1251,7 @@
     transition: background 0.2s ease, transform 0.2s ease;
   }
   .takvim-arrow:hover{
-    background:rgba(138,110,75,0.12);
+    background:rgba(var(--accent-rgb),0.12);
     transform:scale(1.08);
   }
   .takvim-arrow svg{ width:1.15rem; height:1.15rem; }
@@ -1135,7 +1298,7 @@
     transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
   }
   .takvim-gun:hover{
-    background:rgba(138,110,75,0.1);
+    background:rgba(var(--accent-rgb),0.1);
   }
   .takvim-gun.disi-ay{
     color:var(--ink-soft);
@@ -1150,7 +1313,7 @@
     background:var(--accent);
   }
   .takvim-gun.secili:not(.bugun){
-    background:rgba(138,110,75,0.22);
+    background:rgba(var(--accent-rgb),0.22);
     color:var(--ink);
     font-weight:600;
   }
@@ -1181,7 +1344,7 @@
     .stage *, footer, .eyebrow, .rule{ animation:none !important; opacity:1 !important; filter:none !important; transform:none !important; }
     .rule{ width:64px; }
     .nav-pill, .nav-items a, .nav-logo, .nav-menu-icon, .nav-highlight{ transition:none !important; }
-    .empty-word, .empty-rule, .empty-sub, .stage, .view-empty{ animation:none !important; opacity:1 !important; filter:none !important; transform:none !important; }
+    .empty-word, .empty-rule, .empty-sub, .settings-row, .stage, .view-empty{ animation:none !important; opacity:1 !important; filter:none !important; transform:none !important; }
     .empty-rule{ width:64px; }
     .dock, .dock-btn, .dock-tip, .gundelik-eyebrow, .gundelik-title, .gundelik-sub, .view-gundelik{ animation:none !important; transition:none !important; opacity:1 !important; filter:none !important; transform:none !important; }
   }
@@ -1210,11 +1373,16 @@
   </div>
 
   <div class="field">
-    <span class="mote"></span>
-    <span class="mote"></span>
-    <span class="mote"></span>
-    <span class="mote"></span>
-    <span class="mote"></span>
+    <span class="ray"></span>
+    <span class="ray"></span>
+    <span class="ray"></span>
+    <span class="dust"></span>
+    <span class="dust"></span>
+    <span class="dust"></span>
+    <span class="dust"></span>
+    <span class="dust"></span>
+    <span class="dust"></span>
+    <span class="dust"></span>
   </div>
 
   <main class="stage" id="viewHome">
@@ -1232,9 +1400,18 @@
 
   <div class="view-empty" id="viewEmpty">
     <div class="empty-inner">
-      <span class="empty-word" id="emptyWord">Yakında</span>
+      <span class="empty-word" id="emptyWord">Ayarlar</span>
       <div class="empty-rule" id="emptyRule"></div>
-      <p class="empty-sub" id="emptySub">Bu bölüm üzerinde çalışıyoruz</p>
+      <p class="empty-sub" id="emptySub">Görünüm tercihini burada yönetebilirsin</p>
+      <div class="settings-row" id="settingsRow">
+        <div class="settings-row-text">
+          <span class="settings-row-title">Koyu Mod</span>
+          <span class="settings-row-sub" id="themeStateLabel">Açık mod aktif</span>
+        </div>
+        <button type="button" class="theme-switch" id="themeSwitch" role="switch" aria-checked="false" aria-label="Koyu mod anahtarı">
+          <span class="theme-switch-knob"></span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1430,6 +1607,19 @@
       }
     });
 
+    // ---- Logo görseline basınca nav bar'ı kapat ----
+    const navLogo = pill.querySelector('.nav-logo');
+    if(navLogo){
+      navLogo.addEventListener('click', function(e){
+        if(isExpanded){
+          e.stopPropagation();
+          isExpanded = false;
+          collapseScrollY = window.scrollY;
+          pill.classList.add('collapsed');
+        }
+      });
+    }
+
     // ---- Nav seçim (highlight) animasyonu ----
     const highlight = document.getElementById('navHighlight');
     const navLinks = Array.from(pill.querySelectorAll('.nav-items a'));
@@ -1451,6 +1641,7 @@
     const emptyWord = document.getElementById('emptyWord');
     const emptyRule = document.getElementById('emptyRule');
     const emptySub = document.getElementById('emptySub');
+    const settingsRow = document.getElementById('settingsRow');
     const gundelikEyebrow = document.getElementById('gundelikEyebrow');
     const gundelikTitle = document.getElementById('gundelikTitle');
     const gundelikDock = document.getElementById('gundelikDock');
@@ -1474,6 +1665,7 @@
       emptyWord.classList.remove('animate');
       emptyRule.classList.remove('animate');
       emptySub.classList.remove('animate');
+      settingsRow.classList.remove('animate');
       gundelikEyebrow.classList.remove('animate');
       gundelikTitle.classList.remove('animate');
       gundelikDock.classList.remove('animate');
@@ -1499,10 +1691,12 @@
       emptyWord.classList.remove('animate');
       emptyRule.classList.remove('animate');
       emptySub.classList.remove('animate');
+      settingsRow.classList.remove('animate');
       void emptyWord.offsetWidth;
       emptyWord.classList.add('animate');
       emptyRule.classList.add('animate');
       emptySub.classList.add('animate');
+      settingsRow.classList.add('animate');
     }
 
     function showGundelikView(){
@@ -1888,6 +2082,46 @@
       const activeLink = pill.querySelector('.nav-items a.active');
       if(activeLink){ moveHighlightTo(activeLink); }
     });
+  })();
+
+  // ================= TEMA (KOYU / AÇIK MOD) =================
+  (function(){
+    const root = document.documentElement;
+    const themeSwitch = document.getElementById('themeSwitch');
+    const themeStateLabel = document.getElementById('themeStateLabel');
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const STORAGE_KEY = 'sessizlik-tema';
+
+    function uygula(tema){
+      if(tema === 'dark'){
+        root.setAttribute('data-theme', 'dark');
+        if(themeSwitch){
+          themeSwitch.classList.add('on');
+          themeSwitch.setAttribute('aria-checked', 'true');
+        }
+        if(themeStateLabel){ themeStateLabel.textContent = 'Koyu mod aktif'; }
+        if(themeColorMeta){ themeColorMeta.setAttribute('content', '#000000'); }
+      } else {
+        root.removeAttribute('data-theme');
+        if(themeSwitch){
+          themeSwitch.classList.remove('on');
+          themeSwitch.setAttribute('aria-checked', 'false');
+        }
+        if(themeStateLabel){ themeStateLabel.textContent = 'Açık mod aktif'; }
+        if(themeColorMeta){ themeColorMeta.setAttribute('content', '#FDFBF7'); }
+      }
+    }
+
+    // <head> içindeki erken betik data-theme'i zaten ayarladı; burada sadece arayüzü senkronize ediyoruz
+    uygula(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+
+    if(themeSwitch){
+      themeSwitch.addEventListener('click', function(){
+        const yeniTema = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        uygula(yeniTema);
+        try{ localStorage.setItem(STORAGE_KEY, yeniTema); }catch(e){}
+      });
+    }
   })();
 
   // ================= ZOOM ENGELLEME =================
